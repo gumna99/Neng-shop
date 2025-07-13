@@ -7,7 +7,10 @@
     "start": "node dist/index.js",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
-    "dev:db": "nodemon --exec ts-node src/scripts/testConnection.ts"
+    "dev:db": "nodemon --exec ts-node src/scripts/testConnection.ts",
+    "dev:db:both": "nodemon --exec ts-node src/scripts/testBothConnections.ts",
+    "dev:db:typeorm": "nodemon --exec ts-node src/scripts/testBothConnections.ts"
+
   },
   "keywords": [],
   "author": "",
@@ -15,13 +18,17 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.25"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",

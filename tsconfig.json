@@ -108,6 +108,9 @@
 
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
-    "skipLibCheck": true /* Skip type checking all .d.ts files. */
+    "skipLibCheck": true, /* Skip type checking all .d.ts files. */
+    // 新增這兩行 - TypeORM 裝飾器必需
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   }
 }
