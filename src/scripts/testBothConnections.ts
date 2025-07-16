@@ -62,5 +62,4 @@ const compareConnections = async () => {
   }
 }
 
-
 runBothTests();

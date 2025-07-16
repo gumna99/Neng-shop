@@ -16,9 +16,9 @@ export const AppDataSource = new DataSource({
   logging: config.app.nodeEnv === "development", // 顯示 SQL 查詢日誌
 
   // Entity 和 Migration 路徑
-  entities: ["src/entities/**/*.ts"], // Entity 檔案位置
-  migrations: ["src/migrations/**/*.ts"], // Migration 檔案位置
-  subscribers: ["src/subscribers/**/*.ts"], // Event subscribers
+  entities: [__dirname + "/../entities/**/*.ts"], // Entity 檔案位置
+  migrations: [__dirname + "/../migrations/**/*.ts"], // Migration 檔案位置
+  subscribers: [__dirname + "/../subscribers/**/*.ts"], // Event subscribers
 
   // 連線池設定
   extra: {
