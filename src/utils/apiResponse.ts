@@ -106,6 +106,5 @@ export class ApiResponseUtil {
 }
 
 // 簡短的別名，讓使用更方便
-export const ApiResponse = ApiResponseUtil;
-
-
+// export const ApiResponse = ApiResponseUtil;
+export { ApiResponseUtil as ApiResponse}

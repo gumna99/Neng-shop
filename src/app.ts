@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import { AppDataSource} from './config/typeorm';
 import { join } from 'path';
 import { timeStamp } from 'console';
+import apiRoutes from './routes';
 
 
 const app = express();
@@ -76,5 +77,7 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
   
   res.status(500).json(errorResponse);
 })
+// 🔥 新增：掛載 API 路由
+app.use('/api', apiRoutes);
 
 export default app;
