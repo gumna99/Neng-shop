@@ -32,7 +32,7 @@ services:
     container_name: neng-shop-pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN _DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin123
     ports:
       - "8080:80"

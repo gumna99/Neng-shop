@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { ApiResponse } from "../utils/apiResponse";
+import { UserService } from "../services/UserService";
+import { JwtUtil } from "../utils/jwt"
 
 export class AuthController {
   /**
@@ -12,12 +14,15 @@ export class AuthController {
       // 2. 檢查使用者是否已存在
       // 3. 建立新使用者
       // 4. 回傳成功訊息
-      console.log("Register request body:", req.body);
+      const userService = new UserService();
+
+      const newUser = await userService.createUser(req.body);
 
       return ApiResponse.success(
         res,
-        { message: "Register endpoint is ready" },
-        "Registration endpoint works!"
+        newUser,
+        "User registered successfully",
+        201  // Created status code
       );
     } catch (error) {
       console.error("Register error:", error);
@@ -35,12 +40,30 @@ export class AuthController {
       // 3. 驗證密碼
       // 4. 生成 JWT token
       // 5. 回傳 token 和使用者資訊
-      console.log("Login request body:", req.body);
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return ApiResponse.error(res, "Email and password are required");
+      }
+
+      const userService = new UserService();
+      const user = await userService.validateCredentials(email, password)
+      if (!user){
+        return ApiResponse.error(res, "Invalid email or password");
+      }
+
+      const tokens = JwtUtil.generateTokenPair({
+        id: user.id,
+        email: user.email,
+        role: user.role
+      })
 
       return ApiResponse.success(
         res,
-        { message: "Login endpoint is ready" },
-        "Login endpoint works!"
+        {user,
+          ...tokens
+        }, 
+        "Login successful"
       );
     } catch (error) {
       console.error("Login error:", error);

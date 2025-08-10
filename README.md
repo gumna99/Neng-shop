@@ -29,21 +29,28 @@ Neng Shop 是一個完整的電商會員系統，具備使用者管理、商品�
 
 ```
 src/
+├── app.ts           # Express 應用程式主檔案
+├── index.ts         # 應用程式入口點
 ├── config/          # 設定檔案
 │   ├── database.ts  # 原生 PostgreSQL 連線配置
 │   ├── typeorm.ts   # TypeORM DataSource 配置
 │   └── env.ts       # 環境變數管理
 ├── entities/        # TypeORM 實體定義
 │   └── User.entity.ts
+├── models/          # 資料模型定義
 ├── repositories/    # 資料存取層
 │   └── BaseRepository.ts
 ├── services/        # 業務邏輯層
 ├── controllers/     # HTTP 請求處理層
+│   └── AuthController.ts
 ├── routes/          # API 路由定義
+│   ├── auth.ts      # 認證相關路由
+│   └── index.ts     # 路由入口檔案
 ├── middleware/      # 中介軟體
 ├── utils/           # 工具函數
 │   ├── password.ts  # 密碼加密工具
-│   └── jwt.ts       # JWT 權杖工具
+│   ├── jwt.ts       # JWT 權杖工具
+│   └── apiResponse.ts # API 回應格式化工具
 ├── types/           # TypeScript 型別定義
 │   ├── api.types.ts # API 回應格式
 │   └── user.types.ts # 使用者相關型別
@@ -111,14 +118,14 @@ npm run dev
 # 開發模式
 npm run dev              # 啟動開發服務器
 npm run dev:db           # 測試資料庫連線
-npm run dev:db:both      # 比較兩種連線方式
+npm run dev:db:typeorm   # 測試 TypeORM 連線
 
 # 建構
 npm run build            # 編譯 TypeScript
 npm start               # 啟動生產環境服務器
 
-# 測試
-npm test                # 執行測試
+# 測試 (尚未實作)
+# npm test               # 執行測試 (待實作)
 ```
 
 ## 🔧 開發特色
@@ -234,6 +241,65 @@ const isValid = await PasswordUtils.compare(password, hashedPassword);
 const validation = PasswordUtils.validateStrength(password);
 ```
 
+## 📡 API 端點文檔
+
+### 認證相關 API
+
+#### ✅ 已實作端點
+
+**用戶註冊**
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "securePassword123",
+  "username": "johndoe",
+  "fullName": "John Doe",
+  "role": "buyer"
+}
+```
+
+**用戶登入**
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "securePassword123"
+}
+```
+
+**回應格式**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "id": 1,
+      "email": "user@example.com",
+      "username": "johndoe",
+      "role": "buyer"
+    },
+    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
+    "expiresIn": "15m"
+  },
+  "timestamp": "2025-08-10T10:30:00.000Z"
+}
+```
+
+#### 🔄 開發中端點
+
+- `GET /api/auth/profile` - 取得個人資料 (需要 JWT)
+- `PUT /api/auth/profile` - 更新個人資料 (需要 JWT)
+- `PUT /api/auth/password` - 修改密碼 (需要 JWT)
+- `POST /api/auth/logout` - 登出 (需要 JWT)
+- `POST /api/auth/refresh` - 更新權杖
+
 ## 🎨 API 設計
 
 ### 統一回應格式
@@ -273,42 +339,57 @@ export const ERROR_CODES = {
   - 環境變數管理系統
 
 - ✅ **核心工具開發**
-  - JWT 權杖管理系統
-  - 密碼加密和驗證工具
+  - JWT 權杖管理系統 (Access + Refresh Token)
+  - 密碼加密和驗證工具 (bcrypt + 12 rounds)
   - API 回應格式標準化
-  - TypeScript 型別定義
+  - TypeScript 型別定義 (使用者、API、JWT)
 
 - ✅ **資料模型設計**
-  - User Entity 完整實作
+  - User Entity 完整實作 (軟刪除、角色系統、OAuth 支援)
+  - UserService 完整 CRUD 功能
   - 基礎 Repository 抽象類別
-  - 分頁查詢機制
-  - 資料驗證規則
+  - 資料驗證規則 (Joi + class-validator)
+
+- ✅ **認證系統 (80% 完成)**
+  - 使用者註冊 API (POST /api/auth/register)
+  - 使用者登入 API (POST /api/auth/login)
+  - JWT 權杖生成和驗證
+  - 密碼強度驗證和加密
 
 ### 開發中功能
 
-- 🔄 **API 路由實作**
-  - 使用者管理 API
-  - 認證授權端點
-  - 錯誤處理中介軟體
+- 🔄 **JWT 中介軟體 (90% 完成)**
+  - JWT 權杖驗證中介軟體
+  - 角色權限檢查 (buyer/seller/admin)
+  - 資源擁有權驗證
+  - Express Request 擴展 (支援 req.user)
 
 ### 待開發功能
 
-- 📋 **商品管理系統**
+- 📋 **受保護的 API 端點 (第 3 週剩餘任務)**
+  - 個人資料 API (GET/PUT /api/auth/profile)
+  - 修改密碼 API (PUT /api/auth/password)
+  - 登出功能 (POST /api/auth/logout)
+  - Refresh Token API (POST /api/auth/refresh)
+  - Google OAuth 整合
+
+- 📋 **商品管理系統 (第 4 週)**
   - Product Entity 設計
   - 商品 CRUD API
   - 庫存管理機制
   - 搜尋和篩選功能
 
-- 📋 **訂單處理系統**
+- 📋 **購物車系統 (第 5 週)**
+  - Cart Entity 設計
+  - 購物車 CRUD API
+  - 庫存檢查機制
+  - 價格變動處理
+
+- 📋 **訂單處理系統 (第 6 週)**
   - Order Entity 設計
   - 訂單狀態管理
-  - 購物車功能
-  - 付款整合
-
-- 📋 **權限控制系統**
-  - 角色權限矩陣
-  - API 存取控制
-  - 資源擁有權驗證
+  - 結帳流程
+  - 交易原子性保證
 
 ## 🤝 貢獻指南
 
@@ -362,4 +443,6 @@ npm run build
 
 ---
 
-**專案狀態**: 開發中 | **版本**: 1.0.0 | **最後更新**: 2025-07-16
+**專案狀態**: 穩定開發中 | **版本**: 0.3.0 | **最後更新**: 2025-08-10
+
+**目前進度**: 第 3 週 - 認證系統 (80% 完成) | **下一里程碑**: JWT 中介軟體完成
