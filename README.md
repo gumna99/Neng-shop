@@ -292,13 +292,49 @@ Content-Type: application/json
 }
 ```
 
+**✅ 受保護端點 (需要 JWT)**
+
+**取得個人資料**
+```http
+GET /api/v1/auth/profile
+Authorization: Bearer <access_token>
+```
+
+**更新個人資料**
+```http
+PUT /api/v1/auth/profile
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "fullName": "Updated Name",
+  "phone": "+1234567890",
+  "address": "123 Main St"
+}
+```
+
+**修改密碼**
+```http
+PUT /api/v1/auth/password
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "currentPassword": "oldpassword",
+  "newPassword": "newpassword123"
+}
+```
+
+**登出**
+```http
+POST /api/v1/auth/logout
+Authorization: Bearer <access_token>
+```
+
 #### 🔄 開發中端點
 
-- `GET /api/auth/profile` - 取得個人資料 (需要 JWT)
-- `PUT /api/auth/profile` - 更新個人資料 (需要 JWT)
-- `PUT /api/auth/password` - 修改密碼 (需要 JWT)
-- `POST /api/auth/logout` - 登出 (需要 JWT)
-- `POST /api/auth/refresh` - 更新權杖
+- `POST /api/v1/auth/refresh` - 更新權杖
+- `GET /api/v1/auth/google` - Google OAuth 登入
 
 ## 🎨 API 設計
 
@@ -350,28 +386,27 @@ export const ERROR_CODES = {
   - 基礎 Repository 抽象類別
   - 資料驗證規則 (Joi + class-validator)
 
-- ✅ **認證系統 (80% 完成)**
-  - 使用者註冊 API (POST /api/auth/register)
-  - 使用者登入 API (POST /api/auth/login)
+- ✅ **認證系統 (95% 完成)**
+  - 使用者註冊 API (POST /api/v1/auth/register)
+  - 使用者登入 API (POST /api/v1/auth/login)
   - JWT 權杖生成和驗證
   - 密碼強度驗證和加密
+  - JWT 中介軟體 (權杖驗證和角色檢查)
+  - 受保護 API 端點 (profile, password, logout)
 
-### 開發中功能
+### 已修復問題
 
-- 🔄 **JWT 中介軟體 (90% 完成)**
-  - JWT 權杖驗證中介軟體
-  - 角色權限檢查 (buyer/seller/admin)
-  - 資源擁有權驗證
-  - Express Request 擴展 (支援 req.user)
+- ✅ **系統穩定性修復**
+  - 修正 User Entity 預設值問題 (`isDeleted: false`)
+  - 修正 Express 路由順序問題 (API 路由在 404 處理器之前)
+  - 完整測試認證系統流程
 
 ### 待開發功能
 
-- 📋 **受保護的 API 端點 (第 3 週剩餘任務)**
-  - 個人資料 API (GET/PUT /api/auth/profile)
-  - 修改密碼 API (PUT /api/auth/password)
-  - 登出功能 (POST /api/auth/logout)
-  - Refresh Token API (POST /api/auth/refresh)
+- 📋 **認證系統完善 (第 3 週剩餘 5%)**
+  - Refresh Token API (POST /api/v1/auth/refresh)
   - Google OAuth 整合
+  - 密碼重設功能
 
 - 📋 **商品管理系統 (第 4 週)**
   - Product Entity 設計
@@ -443,6 +478,57 @@ npm run build
 
 ---
 
-**專案狀態**: 穩定開發中 | **版本**: 0.3.0 | **最後更新**: 2025-08-10
+**專案狀態**: 穩定開發中 | **版本**: 0.3.0 | **最後更新**: 2025-08-11
 
-**目前進度**: 第 3 週 - 認證系統 (80% 完成) | **下一里程碑**: JWT 中介軟體完成
+**目前進度**: 第 3 週 - 認證系統 (95% 完成) | **下一里程碑**: 商品管理系統
+
+## 🔧 JWT 運作原理
+
+### JWT 認證流程
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    participant Database
+
+    Client->>Server: POST /api/v1/auth/login (email, password)
+    Server->>Database: 驗證使用者資料
+    Database-->>Server: 使用者資料 + 密碼檢查
+    Server-->>Client: Access Token + Refresh Token
+
+    Client->>Server: GET /api/v1/auth/profile (Bearer Token)
+    Server->>Server: 驗證 JWT Token
+    Server->>Database: 根據 JWT payload 取得使用者資料
+    Database-->>Server: 使用者完整資料
+    Server-->>Client: 使用者資料
+```
+
+### JWT Token 結構
+
+```javascript
+// Access Token Payload
+{
+  id: 2,
+  email: "test@example.com", 
+  role: "buyer",
+  iat: 1754909708,  // 發行時間
+  exp: 1754910608,  // 過期時間 (15分鐘)
+  aud: "neng-shop-users",  // 受眾
+  iss: "neng-shop"  // 發行者
+}
+
+// JWT 中介軟體處理流程
+1. 檢查 Authorization header 是否存在
+2. 提取 Bearer token 
+3. 驗證 token 有效性 (簽名、過期時間)
+4. 將解碼後的使用者資料注入到 req.user
+5. 繼續處理請求
+```
+
+### 安全特性
+
+- **無狀態**: 伺服器不需要儲存 session
+- **自包含**: token 包含所有必要的使用者資訊
+- **過期機制**: Access Token 15分鐘自動過期
+- **角色檢查**: 支援 buyer/seller/admin 權限控制
