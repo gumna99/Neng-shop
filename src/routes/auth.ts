@@ -4,6 +4,11 @@ import { AuthMiddleware } from "../middleware/auth.middleware";
 
 const router = Router();
 
+// 測試路由
+router.get("/test", (req, res) => {
+  res.json({ message: "Auth routes working!" });
+});
+
 router.post("/register", AuthController.register);
 router.post("/login", AuthController.login);
 // router.post("/refresh", AuthController.refreshToken);

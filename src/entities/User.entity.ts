@@ -42,7 +42,7 @@ export class User {
   role: UserRole;
 
   // 帳號狀態
-  @Column({ default: true })
+  @Column({ default: false })
   isDeleted: boolean;
 
   @Column({ nullable: true })
