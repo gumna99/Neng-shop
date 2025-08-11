@@ -20,7 +20,7 @@ export interface UpdateUserInput {
   avatarUrl?: string;
   phone?: string;
   address?: string;
-  isActive?: boolean;
+  isDeleted?: boolean;
 }
 
 // 回傳給前端的使用者資料（不包含密碼）
