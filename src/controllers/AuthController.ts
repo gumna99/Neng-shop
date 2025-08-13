@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ApiResponse } from "../utils/apiResponse";
 import { UserService } from "../services/UserService";
 import { JwtUtil } from "../utils/jwt"
+import { User } from "../entities/User.entity";
 
 export class AuthController {
   /**
@@ -195,4 +196,47 @@ export class AuthController {
       return ApiResponse.error(res, "Logout failed");
     }
   }
+  /**
+   * 刷新 Access Token
+   * POST /api/v1/auth/refresh
+   */
+  static async refreshToken(req: Request, res: Response) {
+    try {
+      const { refreshToken } = req.body;
+      if (!refreshToken) {
+        return ApiResponse.error(res, "Refresh token is required");
+      }
+      // 驗證 refresh token
+      const decoded = JwtUtil.verifyRefreshToken(refreshToken)
+
+      // 查詢用戶使否還存在
+      const userService = new UserService()
+      const user = await userService.findById(decoded.id);
+
+      if(!user) {
+        return ApiResponse.error(res, "User not found");
+      }
+
+      // 生成新的 token 對
+      const newTokens = JwtUtil.generateTokenPair({
+        id: user.id,
+        email: user.email,
+        role: user.role
+      });
+
+      return ApiResponse.success(
+        res,
+        {
+          user: user,
+          ...newTokens
+        },
+        "Token refreshed successfully"
+      );
+    } catch (error) {
+      console.error("Refresh token error:", error);
+      return ApiResponse.error(res, "refresh token failed");
+
+    }
+  }
+
 }

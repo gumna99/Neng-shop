@@ -11,7 +11,7 @@ router.get("/test", (req, res) => {
 
 router.post("/register", AuthController.register);
 router.post("/login", AuthController.login);
-// router.post("/refresh", AuthController.refreshToken);
+router.post("/refresh", AuthController.refreshToken);
 
 // 🔒 受保護路由（需要登入才能使用）
 router.get('/profile', AuthMiddleware.authenticateToken, AuthController.getProfile);
