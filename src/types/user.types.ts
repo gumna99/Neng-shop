@@ -20,7 +20,7 @@ export interface UpdateUserInput {
   avatarUrl?: string;
   phone?: string;
   address?: string;
-  isActive?: boolean;
+  isDeleted?: boolean;
 }
 
 // 回傳給前端的使用者資料（不包含密碼）
@@ -28,17 +28,12 @@ export interface UserResponse {
   id: number;
   email: string;
   username: string;
-  fullName: string | null;
+  fullname: string | null;
   role: UserRole;
   isVerified: boolean;
-  avatarUrl: string | null;
   phone: string | null;
   address: string | null;
-  isOAuthUser: boolean;
-  isActive: boolean;
-  lastLoginAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+
 }
 
 // 登入請求資料
@@ -57,7 +52,7 @@ export interface LoginResponse {
 
 // JWT 權杖中的資料
 export interface JwtPayload {
-  userId: number;
+  id: number;
   email: string;
   role: UserRole;
   iat?: number;  // issued at

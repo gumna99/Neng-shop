@@ -43,7 +43,7 @@ export class JwtUtil {
   }
   // 生成 Refresh Token
   static generateRefreshToken(
-    payload: Pick<JwtPayload, "userId" | "email">
+    payload: Pick<JwtPayload, "id" | "email">
   ): string {
     const options: SignOptions = {
       expiresIn: this.parseTimeToSeconds(this.REFRESH_TOKEN_EXPIRES_IN),
@@ -70,14 +70,12 @@ export class JwtUtil {
     }
   }
   // 驗證 Refresh Token
-  static verifyRefreshToken(
-    token: string
-  ): Pick<JwtPayload, "userId" | "email"> {
+  static verifyRefreshToken(token: string): Pick<JwtPayload, "id" | "email"> {
     try {
       return jwt.verify(token, this.REFRESH_TOKEN_SECRET, {
         issuer: "neng-shop",
         audience: "neng-shop-users",
-      }) as Pick<JwtPayload, "userId" | "email">;
+      }) as Pick<JwtPayload, "id" | "email">;
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
         throw new Error("REFRESH_TOKEN_EXPIRED");
@@ -99,7 +97,7 @@ export class JwtUtil {
   // 生成 token 對
   static generateTokenPair(user: { id: number; email: string; role: string }) {
     const payload: JwtPayload = {
-      userId: user.id,
+      id: user.id,
       email: user.email,
       role: user.role as any,
     };
@@ -107,7 +105,7 @@ export class JwtUtil {
     return {
       accessToken: this.generateAccessToken(payload),
       refreshToken: this.generateRefreshToken({
-        userId: user.id,
+        id: user.id,
         email: user.email,
       }),
       expiresIn: this.ACCESS_TOKEN_EXPIRES_IN,

@@ -55,7 +55,10 @@ app.get('/health', (req, res) => {
 // app.use('/api/users', userRoutes);
 // app.use('/api/products', productRoutes);
 
-//404
+// 🔥 掛載 API 路由
+app.use('/api', apiRoutes);
+
+//404 - 必須在所有路由之後
 app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Route not found', 
@@ -64,6 +67,7 @@ app.use('*', (req, res) => {
   })
 })
 
+// 錯誤處理中介軟體 - 必須在最後
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('錯誤發生', err);
 
@@ -77,7 +81,5 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
   
   res.status(500).json(errorResponse);
 })
-// 🔥 新增：掛載 API 路由
-app.use('/api', apiRoutes);
 
 export default app;

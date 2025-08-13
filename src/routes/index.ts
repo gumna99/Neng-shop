@@ -8,7 +8,7 @@ const router = Router();
 router.use("/v1/auth", authRoutes);
 
 // health check
-router.get("health", (req, res) => {
+router.get("/health", (req, res) => {
   const healthData = {
     status: "ok",
     version: "1.0.0",
