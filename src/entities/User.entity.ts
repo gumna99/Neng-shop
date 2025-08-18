@@ -42,8 +42,8 @@ export class User {
   role: UserRole;
 
   // 帳號狀態
-  @Column({ default: true })
-  isActive: boolean;
+  @Column({ default: false })
+  isDeleted: boolean;
 
   @Column({ nullable: true })
   lastLoginAt: Date;
