@@ -44,9 +44,9 @@ export class UserService {
 
   private formatUserResponse(user: User): UserResponse {
     const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword as UserResponse;
+    return userWithoutPassword as UserResponse;  // assertion
   }
-
+ 
   async findById(id: number): Promise<UserResponse | null> {
     const user = await this.userRepository.findOne({
       where: { id, isDeleted: false }
