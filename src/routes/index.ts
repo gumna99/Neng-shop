@@ -1,11 +1,14 @@
 import { Router } from "express";
 import authRoutes from "./auth";
+import productRoutes from "./products";
 import { ApiResponse } from "../utils/apiResponse";
 
 const router = Router();
 
 // API 版本控制 - 所有認證相關的路由都會有 /api/v1/auth 前綴
 router.use("/v1/auth", authRoutes);
+
+router.use("/v1/products", productRoutes);
 
 // health check
 router.get("/health", (req, res) => {
