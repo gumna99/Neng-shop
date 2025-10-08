@@ -7,13 +7,11 @@ import {
   BeforeInsert,
   BeforeUpdate,
   OneToMany,
-  OneToOne,
   ValueTransformer
 } from "typeorm";
 import { IsEmail, IsNotEmpty, MinLength} from 'class-validator';
 import 'reflect-metadata';
 import { Product } from "./Product.entity";
-import { Cart } from "./Cart.entity";
 
 // 角色位運算常量
 export const USER_ROLES = {
@@ -109,16 +107,6 @@ export class User {
   @OneToMany(() => Product, (product) => product.seller)
   products: Product[];
 
-  // 生命週期 hooks
-  @BeforeInsert()
-  @BeforeUpdate()
-  updateTimestamp() {
-    this.updatedAt = new Date();
-  }
-
-  @OneToOne(() => Cart, (cart) => cart.user)
-  cart: Cart;
-  
   // 動態屬性
   get isOAuthUser(): boolean {
     return !!this.googleId;
@@ -143,6 +131,12 @@ export class User {
     return this.hasRole('admin');
   }
 
+  // 生命週期 hooks
+  @BeforeInsert()
+  @BeforeUpdate()
+  updateTimestamp() {
+    this.updatedAt = new Date();
+  }
 
   // 實用方法
   toJSON() {

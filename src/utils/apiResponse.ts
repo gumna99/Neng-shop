@@ -50,14 +50,14 @@ export class ApiResponseUtil {
   // 錯誤回應
   static error(
     res: Response,
+    error: string | ApiError,
     message: string = 'An error occurred',
-    statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    error? : string | ApiError
+    statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR
   ): Response<ApiResponse> {
     const response: ApiResponse = {
       success: false,
       message,
-      error: typeof error === 'string' ? error : error?.message,
+      error: typeof error === 'string' ? error : error.message,
       timestamp: new Date().toISOString(),
       path: res.req.originalUrl
     };
@@ -76,23 +76,23 @@ export class ApiResponseUtil {
   }
 // 常見錯誤回應的快捷方法
   static badRequest(res: Response, message: string = 'Bad request'): Response<ApiResponse> {
-    return this.error(res, message, HTTP_STATUS.BAD_REQUEST);
+    return this.error(res, message, message, HTTP_STATUS.BAD_REQUEST);
   }
 
   static unauthorized(res: Response, message: string = 'Unauthorized'): Response<ApiResponse> {
-    return this.error(res, message, HTTP_STATUS.UNAUTHORIZED);
+    return this.error(res, message, message, HTTP_STATUS.UNAUTHORIZED);
   }
 
   static forbidden(res: Response, message: string = 'Forbidden'): Response<ApiResponse> {
-    return this.error(res, message, HTTP_STATUS.FORBIDDEN);
+    return this.error(res, message, message, HTTP_STATUS.FORBIDDEN);
   }
 
   static notFound(res: Response, message: string = 'Resource not found'): Response<ApiResponse> {
-    return this.error(res, message, HTTP_STATUS.NOT_FOUND);
+    return this.error(res, message, message, HTTP_STATUS.NOT_FOUND);
   }
 
   static conflict(res: Response, message: string = 'Resource conflict'): Response<ApiResponse> {
-    return this.error(res, message, HTTP_STATUS.CONFLICT);
+    return this.error(res, message, message, HTTP_STATUS.CONFLICT);
   }
 
   static validationError(res: Response, details: any, message: string = 'Validation failed'): Response<ApiResponse> {
@@ -101,7 +101,7 @@ export class ApiResponseUtil {
       message,
       details
     };
-    return this.error(res, message, HTTP_STATUS.UNPROCESSABLE_ENTITY, apiError);
+    return this.error(res, apiError, message, HTTP_STATUS.UNPROCESSABLE_ENTITY);
   }
 }
 
