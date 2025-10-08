@@ -13,6 +13,7 @@ Neng Shop 是一個完整的電商會員系統，具備使用者管理、商品�
 - **分類系統**：6大商品分類、統計分析、完整搜尋支援 ✅
 - **認證系統**：JWT 雙權杖、密碼加密、權限控制 ✅
 - **權限控制**：基於角色的存取控制（RBAC）✅
+- **購物車系統**：購物車 CRUD、庫存檢查、價格快照、智能提醒 ✅
 - **訂單系統**：訂單建立、狀態管理、歷史記錄 🔄 (規劃中)
 
 ## 🛠️ 技術架構
@@ -38,19 +39,24 @@ src/
 │   └── env.ts       # 環境變數管理
 ├── entities/        # TypeORM 實體定義
 │   ├── User.entity.ts
-│   └── Product.entity.ts
+│   ├── Product.entity.ts
+│   ├── Cart.entity.ts
+│   └── CartItem.entity.ts
 ├── models/          # 資料模型定義
 ├── repositories/    # 資料存取層
 │   └── BaseRepository.ts
 ├── services/        # 業務邏輯層
 │   ├── UserService.ts
-│   └── ProductService.ts
+│   ├── ProductService.ts
+│   └── CartService.ts
 ├── controllers/     # HTTP 請求處理層
 │   ├── AuthController.ts
-│   └── ProductController.ts
+│   ├── ProductController.ts
+│   └── CartController.ts
 ├── routes/          # API 路由定義
 │   ├── auth.ts      # 認證相關路由
 │   ├── products.ts  # 商品相關路由
+│   ├── cart.ts      # 購物車相關路由
 │   └── index.ts     # 路由入口檔案
 ├── middleware/      # 中介軟體
 ├── utils/           # 工具函數
@@ -60,7 +66,8 @@ src/
 ├── types/           # TypeScript 型別定義
 │   ├── api.types.ts # API 回應格式
 │   ├── user.types.ts # 使用者相關型別
-│   └── product.types.ts # 商品相關型別
+│   ├── product.types.ts # 商品相關型別
+│   └── cart.types.ts # 購物車相關型別
 └── scripts/         # 開發輔助腳本
     └── testBothConnections.ts
 ```
@@ -164,48 +171,7 @@ npm start               # 啟動生產環境服務器
 - **自定義型別**: 為 API、使用者、資料庫操作定義明確型別
 - **裝飾器支援**: 啟用 `experimentalDecorators` 和 `emitDecoratorMetadata`
 
-## 🗃️ 資料庫設計
-
-### 使用者實體 (User Entity)
-
-```typescript
-@Entity("users")
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ unique: true })
-  email: string;
-
-  @Column()
-  password: string;
-
-  @Column({ unique: true })
-  username: string;
-
-  @Column({ type: 'enum', enum: ['buyer', 'seller', 'admin'], default: 'buyer' })
-  role: UserRole;
-
-  @Column({ default: true })
-  isActive: boolean;
-
-  // OAuth 支援
-  @Column({ nullable: true })
-  googleId: string;
-
-  @Column({ default: false })
-  isOAuthUser: boolean;
-
-  // 時間戳記
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-}
-```
-
-### 資料庫管理
+## 🗃️ 資料庫管理
 
 ```bash
 # 啟動 PostgreSQL 和 pgAdmin
@@ -250,125 +216,18 @@ const validation = PasswordUtils.validateStrength(password);
 
 ## 📡 API 端點文檔
 
-### 認證相關 API
+### 認證相關 API ✅ **已實作**
 
-#### ✅ 已實作端點
-
-**用戶註冊**
-```http
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "securePassword123",
-  "username": "johndoe",
-  "fullName": "John Doe",
-  "role": "buyer"
-}
-```
-
-**用戶登入**
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "securePassword123"
-}
-```
-
-**回應格式**
-```json
-{
-  "success": true,
-  "message": "Login successful",
-  "data": {
-    "user": {
-      "id": 1,
-      "email": "user@example.com",
-      "username": "johndoe",
-      "role": "buyer"
-    },
-    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
-    "expiresIn": "15m"
-  },
-  "timestamp": "2025-08-10T10:30:00.000Z"
-}
-```
-
-**✅ 受保護端點 (需要 JWT)**
-
-**取得個人資料**
-```http
-GET /api/v1/auth/profile
-Authorization: Bearer <access_token>
-```
-
-**更新個人資料**
-```http
-PUT /api/v1/auth/profile
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-{
-  "fullName": "Updated Name",
-  "phone": "+1234567890",
-  "address": "123 Main St"
-}
-```
-
-**修改密碼**
-```http
-PUT /api/v1/auth/password
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-{
-  "currentPassword": "oldpassword",
-  "newPassword": "newpassword123"
-}
-```
-
-**登出**
-```http
-POST /api/v1/auth/logout
-Authorization: Bearer <access_token>
-```
-
-**🆕 權杖更新 (Refresh Token)**
-```http
-POST /api/v1/auth/refresh
-Content-Type: application/json
-
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
-}
-```
-
-**回應範例**
-```json
-{
-  "success": true,
-  "message": "Token refreshed successfully",
-  "data": {
-    "user": {
-      "id": 2,
-      "email": "user@example.com",
-      "username": "johndoe",
-      "role": "buyer"
-    },
-    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
-    "expiresIn": "15m"
-  }
-}
-```
+#### 主要端點
+- `POST /api/auth/register` - 用戶註冊
+- `POST /api/auth/login` - 用戶登入  
+- `POST /api/v1/auth/refresh` - 權杖更新
+- `GET /api/v1/auth/profile` - 取得個人資料
+- `PUT /api/v1/auth/profile` - 更新個人資料
+- `PUT /api/v1/auth/password` - 修改密碼
+- `POST /api/v1/auth/logout` - 登出
 
 #### 🔄 開發中端點
-
 - `GET /api/v1/auth/google` - Google OAuth 登入
 
 ### 商品管理 API ✅ **已實作**
@@ -390,33 +249,25 @@ Content-Type: application/json
 - **權限控制**: 賣家只能管理自己的商品
 - **商品分類**: 6大分類 (時尚、電子、居家、美妝、運動、其他)
 
+### 購物車管理 API ✅ **已實作**
+
+#### 主要端點 (需要認證)
+- `GET /api/v1/cart` - 取得使用者購物車
+- `POST /api/v1/cart/items` - 加入商品到購物車
+- `PUT /api/v1/cart/items/:cartItemId` - 更新購物車商品數量
+- `DELETE /api/v1/cart/items/:cartItemId` - 移除購物車中的商品
+- `DELETE /api/v1/cart` - 清空購物車
+
+#### 核心功能
+- 庫存驗證與自動調整、價格快照、智能警告系統、自動計算總額
+
 ## 🎨 API 設計
 
 ### 統一回應格式
-
-```typescript
-interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data?: T;
-  error?: string;
-  timestamp: string;
-  path?: string;
-}
-```
+所有 API 回應都遵循標準格式：`{ success, message, data?, error?, timestamp }`
 
 ### 錯誤處理
-
-```typescript
-// 錯誤碼定義
-export const ERROR_CODES = {
-  INVALID_CREDENTIALS: "INVALID_CREDENTIALS",
-  TOKEN_EXPIRED: "TOKEN_EXPIRED",
-  USER_NOT_FOUND: "USER_NOT_FOUND",
-  EMAIL_ALREADY_EXISTS: "EMAIL_ALREADY_EXISTS",
-  // ...
-};
-```
+統一的錯誤碼系統，包含認證、權限、資料驗證等錯誤類型
 
 ## 📊 開發進度
 
@@ -460,6 +311,16 @@ export const ERROR_CODES = {
   - 庫存管理 (自動狀態更新)
   - 商品與用戶關聯 (seller relationship)
 
+- ✅ **購物車系統 (100% 完成)** 🎉
+  - Cart 和 CartItem Entity 設計 (一對一和一對多關聯)
+  - 購物車 CRUD API (查看、加入、更新、刪除、清空)
+  - 庫存自動驗證和數量調整機制
+  - 價格快照功能 (記錄加入時的價格)
+  - 智能警告系統 (庫存不足、價格變動、低庫存提醒)
+  - 自動計算總數量和總金額
+  - 完整的商品資訊關聯展示
+  - 購物車與用戶一對一關聯 (自動建立)
+
 ### 已修復問題
 
 - ✅ **系統穩定性修復**
@@ -488,11 +349,11 @@ export const ERROR_CODES = {
   - ✅ 庫存管理機制
   - ✅ 搜尋和篩選功能
 
-- 📋 **購物車系統 (第 5 週)**
-  - Cart Entity 設計
-  - 購物車 CRUD API
-  - 庫存檢查機制
-  - 價格變動處理
+- ✅ **購物車系統 (第 5 週) - 已完成**
+  - ✅ Cart 和 CartItem Entity 設計
+  - ✅ 購物車 CRUD API
+  - ✅ 庫存檢查機制
+  - ✅ 價格變動處理
 
 - 📋 **訂單處理系統 (第 6 週)**
   - Order Entity 設計
@@ -552,13 +413,13 @@ npm run build
 
 ---
 
-**專案狀態**: 穩定開發中 | **版本**: 0.4.0 | **最後更新**: 2025-09-18
+**專案狀態**: 穩定開發中 | **版本**: 0.5.0 | **最後更新**: 2025-10-08
 
-**目前進度**: 第 4 週 - 商品管理系統 (100% 完成) 🎉 | **下一里程碑**: 購物車系統
+**目前進度**: 第 5 週 - 購物車系統 (100% 完成) 🎉 | **下一里程碑**: 訂單處理系統
 
-## 🎉 里程碑達成 - 完整電商核心系統
+## 🎉 里程碑達成 - 完整電商購物系統
 
-恭喜！你已經成功實作了一個完整的電商核心系統，包含認證系統和商品管理系統：
+恭喜！你已經成功實作了一個完整的電商購物系統，包含認證系統、商品管理系統和購物車系統：
 
 ### 🔐 企業級認證系統 (第3週)
 - ✅ 用戶註冊與登入
@@ -579,6 +440,16 @@ npm run build
 - ✅ 分類統計API (商品數量、平均價格)
 - ✅ 賣家權限控制 (只能管理自己的商品)
 - ✅ 庫存管理 (自動狀態更新)
+
+### 🛒 完整購物車系統 (第5週)
+- ✅ 購物車實體設計 (Cart + CartItem 關聯設計)
+- ✅ 購物車CRUD操作 (查看、加入、更新、移除、清空)
+- ✅ 智能庫存檢查 (自動驗證庫存並調整數量)
+- ✅ 價格快照機制 (記錄加入時的商品價格)
+- ✅ 智能警告系統 (庫存不足、價格變動、低庫存提醒)
+- ✅ 自動計算功能 (總數量、總金額即時計算)
+- ✅ 商品資訊展示 (完整商品詳情、圖片、狀態)
+- ✅ 用戶關聯管理 (一對一購物車自動建立)
 
 ### 📊 系統品質
 - ✅ 統一 API 回應格式
