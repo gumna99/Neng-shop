@@ -3,7 +3,6 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToMany,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
@@ -11,7 +10,6 @@ import {
 
 import { User } from "./User.entity";
 import { IsNotEmpty } from "class-validator";
-import { CartItem } from "./CartItem.entity"
 
 // 商品狀態
 export enum ProductStatus {
@@ -83,8 +81,5 @@ export class Product {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @OneToMany(() => CartItem, (cartItem) => cartItem.product)
-  cartItems: CartItem[];
 
 }
