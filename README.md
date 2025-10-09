@@ -547,3 +547,4 @@ sequenceDiagram
 - **自包含**: token 包含所有必要的使用者資訊
 - **過期機制**: Access Token 15分鐘自動過期
 - **角色檢查**: 支援 buyer/seller/admin 權限控制
+
