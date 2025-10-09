@@ -14,7 +14,7 @@ Neng Shop 是一個完整的電商會員系統，具備使用者管理、商品�
 - **認證系統**：JWT 雙權杖、密碼加密、權限控制 ✅
 - **權限控制**：基於角色的存取控制（RBAC）✅
 - **購物車系統**：購物車 CRUD、庫存檢查、價格快照、智能提醒 ✅
-- **訂單系統**：訂單建立、狀態管理、歷史記錄 🔄 (規劃中)
+- **訂單系統**：訂單建立、狀態管理、結帳流程、庫存扣減 ✅
 
 ## 🛠️ 技術架構
 
@@ -41,22 +41,27 @@ src/
 │   ├── User.entity.ts
 │   ├── Product.entity.ts
 │   ├── Cart.entity.ts
-│   └── CartItem.entity.ts
+│   ├── CartItem.entity.ts
+│   ├── Order.entity.ts
+│   └── OrderItem.entity.ts
 ├── models/          # 資料模型定義
 ├── repositories/    # 資料存取層
 │   └── BaseRepository.ts
 ├── services/        # 業務邏輯層
 │   ├── UserService.ts
 │   ├── ProductService.ts
-│   └── CartService.ts
+│   ├── CartService.ts
+│   └── OrderService.ts
 ├── controllers/     # HTTP 請求處理層
 │   ├── AuthController.ts
 │   ├── ProductController.ts
-│   └── CartController.ts
+│   ├── CartController.ts
+│   └── OrderController.ts
 ├── routes/          # API 路由定義
 │   ├── auth.ts      # 認證相關路由
 │   ├── products.ts  # 商品相關路由
 │   ├── cart.ts      # 購物車相關路由
+│   ├── orders.ts    # 訂單相關路由
 │   └── index.ts     # 路由入口檔案
 ├── middleware/      # 中介軟體
 ├── utils/           # 工具函數
@@ -67,7 +72,8 @@ src/
 │   ├── api.types.ts # API 回應格式
 │   ├── user.types.ts # 使用者相關型別
 │   ├── product.types.ts # 商品相關型別
-│   └── cart.types.ts # 購物車相關型別
+│   ├── cart.types.ts # 購物車相關型別
+│   └── order.types.ts # 訂單相關型別
 └── scripts/         # 開發輔助腳本
     └── testBothConnections.ts
 ```
@@ -261,6 +267,17 @@ const validation = PasswordUtils.validateStrength(password);
 #### 核心功能
 - 庫存驗證與自動調整、價格快照、智能警告系統、自動計算總額
 
+### 訂單管理 API ✅ **已實作**
+
+#### 主要端點 (需要認證)
+- `POST /api/v1/orders` - 建立訂單 (從購物車)
+- `GET /api/v1/orders` - 取得使用者訂單列表
+- `GET /api/v1/orders/:id` - 取得訂單詳情
+- `PATCH /api/v1/orders/:id/cancel` - 取消訂單
+
+#### 核心功能
+- 購物車轉訂單流程、商品快照保存、Transaction 原子性、悲觀鎖併發控制、庫存回補機制
+
 ## 🎨 API 設計
 
 ### 統一回應格式
@@ -321,6 +338,16 @@ const validation = PasswordUtils.validateStrength(password);
   - 完整的商品資訊關聯展示
   - 購物車與用戶一對一關聯 (自動建立)
 
+- ✅ **訂單系統 (100% 完成)** 🎉
+  - Order 和 OrderItem Entity 設計 (完整訂單資料模型)
+  - 訂單 CRUD API (建立、查詢列表、查詢詳情、取消)
+  - 完整結帳流程 (購物車→訂單轉換、商品快照、庫存扣減)
+  - Transaction 原子性保證 (4步驟原子操作)
+  - 悲觀鎖併發控制 (防止超賣問題)
+  - 自定義業務錯誤處理 (BusinessError、EmptyCartError 等)
+  - 庫存回補機制 (取消訂單時自動回復庫存)
+  - 訂單狀態管理 (pending, cancelled 等狀態)
+
 ### 已修復問題
 
 - ✅ **系統穩定性修復**
@@ -355,11 +382,13 @@ const validation = PasswordUtils.validateStrength(password);
   - ✅ 庫存檢查機制
   - ✅ 價格變動處理
 
-- 📋 **訂單處理系統 (第 6 週)**
-  - Order Entity 設計
-  - 訂單狀態管理
-  - 結帳流程
-  - 交易原子性保證
+- ✅ **訂單處理系統 (第 6 週) - 已完成**
+  - ✅ Order 和 OrderItem Entity 設計
+  - ✅ 訂單狀態管理 (pending/cancelled)
+  - ✅ 完整結帳流程 (購物車→訂單轉換)
+  - ✅ Transaction 原子性保證
+  - ✅ 悲觀鎖併發控制
+  - ✅ 庫存扣減與回補機制
 
 ## 🤝 貢獻指南
 
@@ -413,13 +442,13 @@ npm run build
 
 ---
 
-**專案狀態**: 穩定開發中 | **版本**: 0.5.0 | **最後更新**: 2025-10-08
+**專案狀態**: 穩定開發中 | **版本**: 0.6.0 | **最後更新**: 2025-10-09
 
-**目前進度**: 第 5 週 - 購物車系統 (100% 完成) 🎉 | **下一里程碑**: 訂單處理系統
+**目前進度**: 第 6 週 - 訂單系統 (100% 完成) 🎉 | **下一里程碑**: 賣家後台管理系統
 
 ## 🎉 里程碑達成 - 完整電商購物系統
 
-恭喜！你已經成功實作了一個完整的電商購物系統，包含認證系統、商品管理系統和購物車系統：
+恭喜！你已經成功實作了一個完整的電商購物系統，包含認證系統、商品管理系統、購物車系統和訂單系統：
 
 ### 🔐 企業級認證系統 (第3週)
 - ✅ 用戶註冊與登入
@@ -450,6 +479,16 @@ npm run build
 - ✅ 自動計算功能 (總數量、總金額即時計算)
 - ✅ 商品資訊展示 (完整商品詳情、圖片、狀態)
 - ✅ 用戶關聯管理 (一對一購物車自動建立)
+
+### 📦 企業級訂單系統 (第6週)
+- ✅ 訂單實體設計 (Order + OrderItem 完整關聯設計)
+- ✅ 訂單CRUD操作 (建立、查詢列表、查詢詳情、取消)
+- ✅ 企業級結帳流程 (購物車→訂單轉換、商品快照)
+- ✅ Transaction 原子性保證 (4步驟原子操作確保資料一致性)
+- ✅ 悲觀鎖併發控制 (防止超賣問題)
+- ✅ 智能庫存管理 (扣減與回補機制)
+- ✅ 自定義業務錯誤 (BusinessError、EmptyCartError、InsufficientStockError)
+- ✅ 訂單狀態管理 (pending, cancelled 等狀態轉換)
 
 ### 📊 系統品質
 - ✅ 統一 API 回應格式
