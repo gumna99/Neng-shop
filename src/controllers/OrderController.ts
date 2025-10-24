@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { OrderService } from "../services/OrderService";
+import { BusinessError, OrderService } from "../services/OrderService";
 import { ApiResponse } from "../utils/apiResponse";
 import { CreateOrderInput } from "../types/order.types";
 
@@ -127,7 +127,7 @@ export class OrderController {
   
   /**
    * 取消訂單
-   * PATCH /api/v1/orders/:id/cancel
+   * PATCH /api/v1/orders/:id/cancelㄌ
    */
   static async cancelOrder(req: Request, res: Response) {
     try {
@@ -143,15 +143,11 @@ export class OrderController {
       return ApiResponse.success(res, cancelledOrder, "Order cancelled successfully");
     } catch (error: any) {
       console.error("Cancel order error: ", error)
-      if (error.message.includes("訂單不存在") || error.message.includes("只能取消待處理的訂單")) {
-        return ApiResponse.error(res, error.message, 422);
+      if (error instanceof BusinessError) {
+        return ApiResponse.error(res, error.message, error.statusCode);
       }
 
       return ApiResponse.error(res, "Failed to cancel order", 500); 
     }
   }
-
-
-
-
 }
