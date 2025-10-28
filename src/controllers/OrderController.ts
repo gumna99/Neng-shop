@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { BusinessError, OrderService } from "../services/OrderService";
 import { ApiResponse } from "../utils/apiResponse";
-import { CreateOrderInput } from "../types/order.types";
+import { CreateOrderInput, OrderStatus, SellerOrderQuery } from "../types/order.types";
 
 export class OrderController {
   /**
@@ -127,7 +127,7 @@ export class OrderController {
   
   /**
    * 取消訂單
-   * PATCH /api/v1/orders/:id/cancelㄌ
+   * PATCH /api/v1/orders/:id/cancel
    */
   static async cancelOrder(req: Request, res: Response) {
     try {
