@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { BusinessError, OrderService } from "../services/OrderService";
 import { ApiResponse } from "../utils/apiResponse";
-import { CreateOrderInput, OrderStatus, SellerOrderQuery } from "../types/order.types";
+import { CreateOrderInput } from "../types/order.types";
 
 export class OrderController {
   /**
