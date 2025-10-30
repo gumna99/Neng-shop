@@ -44,3 +44,11 @@ export interface UpdateProductData {
   imageUrls?: string[];
   status?: ProductStatus;
 }
+
+export interface SellerProductQuery {
+  status?: ProductStatus;
+  page?: number;
+  limit?: number;
+  sortBy?: 'createdAt' | 'name' | 'price';
+  sortOrder?: 'ASC' | 'DESC';
+}

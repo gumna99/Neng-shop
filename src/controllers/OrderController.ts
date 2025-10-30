@@ -127,7 +127,7 @@ export class OrderController {
   
   /**
    * 取消訂單
-   * PATCH /api/v1/orders/:id/cancelㄌ
+   * PATCH /api/v1/orders/:id/cancel
    */
   static async cancelOrder(req: Request, res: Response) {
     try {

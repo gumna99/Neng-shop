@@ -2,7 +2,8 @@ import { Router } from "express";
 import authRoutes from "./auth";
 import productRoutes from "./products";
 import cartRoutes from "./cart";
-import orderRoutes from "./orders"
+import orderRoutes from "./orders";
+import sellerRoutes from "./seller";
 
 import { ApiResponse } from "../utils/apiResponse";
 
@@ -17,6 +18,7 @@ router.use("/v1/cart", cartRoutes);
 
 router.use("/v1/orders", orderRoutes);
 
+router.use("/v1/seller", sellerRoutes);
 
 // health check
 router.get("/health", (req, res) => {
